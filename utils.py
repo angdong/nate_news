@@ -1,11 +1,23 @@
+from typing import List
+from concurrent.futures import ThreadPoolExecutor
+
 import datetime as dt
+import requests
 
 
 def get_date_list(
     date1: int,
     date2: int=None, 
-    /
 ):
+    """_summary_
+
+    Args:
+        `date1` (int): first date
+        `date2` (int, optional): second date
+
+    Returns:
+        List[str]: date list from `date1` to `date2`
+    """    
     """
     Return list of date(s)
     
@@ -15,6 +27,7 @@ def get_date_list(
     :return:
         date list from `date1` to `date2`
     """
+    
     if not date2:
         return [date1]
     
@@ -29,8 +42,9 @@ def get_date_list(
     
     return date_list
 
-def get_links(
-    date: int,
-    nth_artc: int= 1,
-    num_artc: int= None,
-)
+def multi_request(
+    date_list: List[str]
+):
+    with ThreadPoolExecutor(max_workers=10) as mult:
+        req_list = list(mult.map(requests.get, date_list))
+    return req_list
