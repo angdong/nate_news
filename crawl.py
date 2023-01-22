@@ -6,6 +6,7 @@ LINK = 'https://news.nate.com/view/'
 
 # TODO: return DataFrame form news
 # TODO: Real-time crawl(with same domain)
+# TODO: find "similar" news
 """
     1. same category
     2. same contents(search..?)
@@ -13,50 +14,54 @@ LINK = 'https://news.nate.com/view/'
     4. etc.
 """
 
-class NateNews:
-    """
-    Crawler for natenews
+class NateNews:    
+    """Crawler for natenews
     
+    Args:
+        `url` (str): 
     :param url: news url, form should be https://news.nate.com/view/{DATE}n{ARTICLE_NUM}
     
-    :var:
+    Var:
         `self.day`: day format(%Y%m%d)
         `self.post_num`: order of article in that day
         `self.content`: article content
         `self.title` : article title
-        `self.category` : category of news 
+        `self.category` : category of news
     """    
     def __init__(self, url:str):        
         res = requests.get(url)
         assert res.status_code == 200
         
         html = res.text
+        self.content = bs(html, 'html.parser')
+
+        # TODO: will be used (self.day, self.post_num)
         # self.day = int(url.split('/')[-1].split('n'))
         # self.post_num = int(url.split('/')[-1].split('n'))
 
-        self.content = bs(html, 'html.parser')
-        # self.title = self._get_title()
-        # self.category = self._get_category()
-        # self.time = self._get_time()
-        # self.press = self._get_press()
+    def get_press(self):
+        # TODO: get hyperlink of same press
+
+        press = self.content.find('a', {'class': 'medium'})
+        return press.text
+
+    def get_category(self):
+        nav = self.content.find('div', {'id': 'mediaSubnav'})
+        category = nav.find('h3')
+        return category.text
 
     def _get_contents(self):
         # TODO: data cleaning
-        # TODO: <p> tag handling
         # TODO: accumulate all the attributes below
         article = self.content.find('div', {'id': 'realArtcContents'})
         text = article.text
 
         return text
     
-    def get_title(self):
+    def _get_title(self):
         title = self.content.find('h3', {'class': 'articleSubecjt'})
         return title.text
     
-    def _get_category(self):
-        nav = self.content.find('div', {'id': 'mediaSubnav'})
-        category = nav.find('h3')
-        return category.text
     
     def _get_time(self):
         # TODO: get article of same date
@@ -66,14 +71,21 @@ class NateNews:
         time = dt.datetime.strptime(_time, "%Y-%m-%d %H:%M")
         return time.text
     
-    def _get_press(self):
-        # TODO: get hyperlink of same press
-
-        press = self.content.find('a', {'class': 'medium'})
-        return press.text
     
     @staticmethod
     def get_recent(date: int):
+        """get latest article number in Nate given date
+
+        Args:
+            `date` (int): date in which latest article number will be found
+
+        Note:
+            Can't return accurate number of article
+            -> get latest number of article in '최신뉴스' in Nate
+
+        Returns:
+            int: latest article number
+        """        
         req = requests.get(f'https://news.nate.com/recent?mid=n0100&type=c&date={date}')
         content = bs(req.text, 'html.parser')
         _recent = content.find_all('div', {'class': 'mlt01'})
@@ -91,6 +103,20 @@ class NateNews:
         cls,
         url:str
     ):
+        """create `NateNews` if it satisfy some conditions
+
+        Args:
+            `url` (str): url for news in Nate
+
+        Desc:
+            return `NateNews` if given url satisfy some conditions
+            * 1. Should have article(RealArtcContents or articleContetns)
+            * 2. Only for '뉴스', exclude for '연예', '스포츠'
+            # TODO: add exclusion rule for press('연합뉴스',etc..)
+            
+        Returns:
+            Union[NateNews, None]: 
+        """        
         new_class = cls(url)
         article = new_class.content.find(
             'div',
