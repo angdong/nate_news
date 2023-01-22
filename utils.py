@@ -32,6 +32,29 @@ def get_urls(
     artc1: Union[int, None]=None,
     artc2: Union[int, None]=None,
 ):
+    """get url list
+    
+    Desc:
+        url list
+        eg:
+            `date1`: `article1` ~ `article2`
+            `dateN`: `article1` ~ `article2`
+            \n\t\t...
+            `date2`: `article1` ~ `article2`
+
+    Args:
+        date1 (Union[int, None], optional):
+            None -> `datetime.datetime.now()`
+        date2 (Union[int, None], optional): 
+            None -> `date1`
+        artc1 (Union[int, None], optional):
+            None -> 1: first article of that day
+        artc2 (Union[int, None], optional):
+            None -> last article of that day
+
+    Returns:
+        List[str]: url list
+    """    
     date1 = date1 if date1 else int(dt.datetime.now().strftime('%Y%m%d'))
     date2 = date2 if date2 else date1
     artc1 = artc1 if artc1 else 1
