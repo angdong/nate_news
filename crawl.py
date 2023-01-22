@@ -18,17 +18,13 @@ class NateNews:
     """Crawler for natenews
     
     Args:
-        `url` (str): 
-    :param url: news url, form should be https://news.nate.com/view/{DATE}n{ARTICLE_NUM}
+        `url` (str): news url, form should be https://news.nate.com/view/{DATE}n{ARTICLE_NUM}
     
     Var:
-        `self.day`: day format(%Y%m%d)
-        `self.post_num`: order of article in that day
+        `self.url`: article's url
         `self.content`: article content
-        `self.title` : article title
-        `self.category` : category of news
     """    
-    def __init__(self, url:str):        
+    def __init__(self, url:str):
         res = requests.get(url)
         assert res.status_code == 200
         
@@ -56,20 +52,20 @@ class NateNews:
         """
         return[
             self._get_title(),
-            self.category,
-            self.press,
+            self._get_category(),
+            self._get_press(),
             self._get_date(),
             self._get_content(),
             self.url
         ]
 
-    @property
-    def press(self):
-        return self._get_press()
+    # @property
+    # def press(self):
+    #     return self._get_press()
     
-    @property
-    def category(self):
-        return self._get_category()
+    # @property
+    # def category(self):
+    #     return self._get_category()
 
     def _get_press(self):
         # TODO: get hyperlink of same press
