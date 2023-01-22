@@ -39,18 +39,26 @@ class NateNews:
         # self.day = int(url.split('/')[-1].split('n'))
         # self.post_num = int(url.split('/')[-1].split('n'))
 
-    def get_press(self):
+    @property
+    def press(self):
+        return self._get_press()
+    
+    @property
+    def category(self):
+        return self._get_category()
+
+    def _get_press(self):
         # TODO: get hyperlink of same press
 
         press = self.content.find('a', {'class': 'medium'})
         return press.text
 
-    def get_category(self):
+    def _get_category(self):
         nav = self.content.find('div', {'id': 'mediaSubnav'})
         category = nav.find('h3')
         return category.text
 
-    def _get_contents(self):
+    def _get_content(self):
         # TODO: data cleaning
         # TODO: accumulate all the attributes below
         article = self.content.find('div', {'id': 'realArtcContents'})
@@ -112,11 +120,11 @@ class NateNews:
             return `NateNews` if given url satisfy some conditions
             * 1. Should have article(RealArtcContents or articleContetns)
             * 2. Only for '뉴스', exclude for '연예', '스포츠'
-            # TODO: add exclusion rule for press('연합뉴스',etc..)
             
         Returns:
             Union[NateNews, None]: 
         """        
+        # TODO: add exclusion rule for press('연합뉴스',etc..)
         new_class = cls(url)
         article = new_class.content.find(
             'div',
@@ -138,3 +146,4 @@ class NateNews:
             return new_class
         else:
             return None
+
