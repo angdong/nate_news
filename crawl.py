@@ -4,6 +4,15 @@ from bs4 import BeautifulSoup as bs
 
 LINK = 'https://news.nate.com/view/'
 
+# TODO: return DataFrame form news
+# TODO: Real-time crawl(with same domain)
+"""
+    1. same category
+    2. same contents(search..?)
+    3. same press
+    4. etc.
+"""
+
 class NateNews:
     """
     Crawler for natenews
@@ -22,14 +31,14 @@ class NateNews:
         assert res.status_code == 200
         
         html = res.text
-        self.day = int(url.split('/')[-1].split('n'))
-        self.post_num = int(url.split('/')[-1].split('n'))
+        # self.day = int(url.split('/')[-1].split('n'))
+        # self.post_num = int(url.split('/')[-1].split('n'))
 
         self.content = bs(html, 'html.parser')
-        self.title = self._get_title()
-        self.category = self._get_category()
-        self.time = self._get_time()
-        self.press = self._get_press()
+        # self.title = self._get_title()
+        # self.category = self._get_category()
+        # self.time = self._get_time()
+        # self.press = self._get_press()
 
     def _get_contents(self):
         # TODO: data cleaning
@@ -40,9 +49,9 @@ class NateNews:
 
         return text
     
-    def _get_title(self):
+    def get_title(self):
         title = self.content.find('h3', {'class': 'articleSubecjt'})
-        return title
+        return title.text
     
     def _get_category(self):
         nav = self.content.find('div', {'id': 'mediaSubnav'})
@@ -63,54 +72,43 @@ class NateNews:
         press = self.content.find('a', {'class': 'medium'})
         return press.text
     
-    # TODO: staticmethod handling -> move to other dir?
     @staticmethod
-    def get_contents(url):
-        """get contents
+    def get_recent(date: int):
+        req = requests.get(f'https://news.nate.com/recent?mid=n0100&type=c&date={date}')
+        content = bs(req.text, 'html.parser')
+        _recent = content.find_all('div', {'class': 'mlt01'})
+        
+        latest = None
+        for news in _recent:
+            # recent = //news.nate.com/view/{YYYY}{mm}{dd}n{NNNNN}?mid=n0100
+            recent = int(news.find('a')['href'].split('?')[0][-5:])
+            if not latest or latest < recent:
+                latest = recent
+        return latest # return latest article number
 
-        Args:
-            url (_type_): _description_
-
-        Returns:
-            _type_: _description_
-        """        
-        res = requests.get(url)
-        assert res.status_code == 200 
-        html = res.text
-        content = bs(html, 'html.parser')
-        article = content.find('div', {'id': 'realArtcContents'})
-        return article.text
-    
-    @staticmethod
-    def get_list_contents(
-        date: int,
-        nth_artc: int=1,
-        num_artc: int=99999,
+    @classmethod
+    def create(
+        cls,
+        url:str
     ):
-        content_list = list()
-        none_list = list()
-        flag = 0
-        for num in range(nth_artc, nth_artc + num_artc):
-            url = f"{LINK}{date}n{str(num).zfill(5)}"
-            res = requests.get(url)
-            html = res.text
-            content = bs(html, 'html.parser')
-            article = content.find(
+        new_class = cls(url)
+        article = new_class.content.find(
+            'div',
+            {'id': 'RealArtcContents'}
+        )
+        if not article:
+            article = new_class.content.find(
                 'div',
-                {'id': 'realArtcContents'}
+                {'id': 'articleContetns'}
             )
-            if not article:
-                article = content.find(
-                    'div',
-                    {'id': 'articleContetns'}
-                )
-            if not article:
-                print(url)
-                none_list.append(url)
-                if flag == 10:
-                    break
-                flag += 1
-            else:
-                content_list.append(article.text)
-                flag = 0
-        return content_list, none_list
+        if not article:
+            return None
+        
+        which_news = new_class.content.find(
+            'a',
+            {'class': 'svcname'}
+        ).text
+        if which_news == '뉴스':
+            return new_class
+        else:
+            return None
