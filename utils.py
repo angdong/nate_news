@@ -4,9 +4,29 @@ from typing import List, Union
 from crawl import NateNews
 
 import datetime as dt
+import pandas as pd
 
-LINK = 'https://news.nate.com/view/'
 # TODO: make *.ipynb for instruct how to use utils.py
+LINK = 'https://news.nate.com/view/'
+COLUMNS = [
+    'title',
+    'category',
+    'press',
+    'date',
+    'content',
+    'url',
+]
+
+def get_news_df(
+    news_list: List[NateNews]
+):
+    """make `pd.DataFrame` with `news_list`
+
+    Returns:
+        pd.DataFame: DataFrmae w.r.t `news_list`
+    """    
+    info_list = [news.get_info() for news in news_list]
+    return pd.DataFrame(info_list, columns=COLUMNS)
 
 def get_news(
     url_list: List[str]
