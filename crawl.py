@@ -32,12 +32,36 @@ class NateNews:
         res = requests.get(url)
         assert res.status_code == 200
         
+        self.url = url
         html = res.text
         self.content = bs(html, 'html.parser')
 
         # TODO: will be used (self.day, self.post_num)
         # self.day = int(url.split('/')[-1].split('n'))
         # self.post_num = int(url.split('/')[-1].split('n'))
+    
+    def get_info(self):
+        """get information of `NateNews`
+        
+        Desc:
+            1. title
+            2. category
+            3. press
+            4. date
+            5. content
+            6. url
+
+        Returns:
+            List[str]: information of `NateNews`
+        """
+        return[
+            self._get_title(),
+            self.category,
+            self.press,
+            self._get_date(),
+            self._get_content(),
+            self.url
+        ]
 
     @property
     def press(self):
@@ -71,13 +95,13 @@ class NateNews:
         return title.text
     
     
-    def _get_time(self):
+    def _get_date(self):
         # TODO: get article of same date
         
-        _time = self.content.find('span', {'class': 'firstDate'})
-        _time = _time.find('em').text
-        time = dt.datetime.strptime(_time, "%Y-%m-%d %H:%M")
-        return time.text
+        _date = self.content.find('span', {'class': 'firstDate'})
+        date = _date.find('em').text
+        # time = dt.datetime.strptime(_time, "%Y-%m-%d %H:%M")
+        return date
     
     
     @staticmethod
@@ -146,4 +170,3 @@ class NateNews:
             return new_class
         else:
             return None
-
