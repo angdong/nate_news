@@ -131,6 +131,8 @@ def _get_artc_list(
         List[int]: article list from `artc1` to `artc2`
     """
     max_article = NateNews.get_recent(date)
+    artc1 = artc1 if artc1 < max_article else max_article
+
     if not artc2 or artc2 > max_article:
         artc2 = max_article
     return [artc for artc in range(artc1, artc2+1)]
