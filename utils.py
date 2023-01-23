@@ -77,7 +77,7 @@ def get_urls(
     """    
     date1 = date1 if date1 else int(dt.datetime.now().strftime('%Y%m%d'))
     date2 = date2 if date2 else date1
-    artc1 = artc1 if artc1 else 1
+    artc1 = artc1 if artc1 and artc1 > 0 else 1
 
     urls = [
         f"{LINK}{date}n{str(num).zfill(5)}"
