@@ -157,12 +157,15 @@ class NateNews:
             )
         if not article:
             return None
-        
-        which_news = new_class.content.find(
-            'a',
-            {'class': 'svcname'}
-        ).text
-        if which_news == '뉴스':
-            return new_class
         else:
-            return None
+            return new_class
+        
+        # code for check '뉴스', '연예', '스포츠'
+        # which_news = new_class.content.find(
+        #     'a',
+        #     {'class': 'svcname'}
+        # ).text
+        # if which_news == '뉴스':
+        #     return new_class
+        # else:
+        #     return None
