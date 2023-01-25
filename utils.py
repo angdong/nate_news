@@ -29,7 +29,7 @@ def get_news_df(
     return pd.DataFrame(info_list, columns=COLUMNS)
 
 def get_news(
-    url_list: List[str]
+    url_list: Union[List[str], str]
 ):
     """Return `NateNews` list
 
@@ -41,6 +41,7 @@ def get_news(
             1. NateNews: Normal Request
             2. None: Abnormal Request(won't get that page)
     """
+    url_list = url_list if isinstance(url_list, list) else [url_list]
     with ThreadPoolExecutor(max_workers=10) as mult:
         _news_list = list(mult.map(NateNews.create, url_list))
     news_list = [news for news in _news_list if news]
